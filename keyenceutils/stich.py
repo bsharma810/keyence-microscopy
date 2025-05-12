@@ -76,7 +76,7 @@ class ImageMetadata:
             self.lens_name = lens_name.text
         else:
             self.lens_name = "LensName not found"
-
+        '''
         # Extract ExposureTime from the XML file
         # <ExposureTime Type="Keyence.Micro.Bio.Common.Utility.KeyValueContainer.ExposureTimeKeyValueContainer, Keyence.Micro.Bio.Common.Utility.KeyValueContainer, Version=1.1.2.14, Culture=neutral, PublicKeyToken=null">
         #<Numerator Type="System.Int32">1</Numerator>
@@ -90,7 +90,7 @@ class ImageMetadata:
             if numerator is not None and denominator is not None:
                 self.exposure_time = float(numerator.text) / float(denominator.text)
             else:
-                self.exposure_time = None
+                self.exposure_time = None     '''
 
     def __str__(self):
         return f"X: {self.image_positions[0]}, Y: {self.image_positions[1]}, Width: {self.dimensions[0]}, Height: {self.dimensions[1]}, nm_per_pixel: {self.nm_per_pixel_values}, lens_name: {self.lens_name}, Exposure_Time: {self.exposure_time}"
@@ -101,8 +101,8 @@ class ImageMetadata:
             "Y": int(self.image_positions[1]/self.nm_per_pixel_values),
             "W": self.dimensions[0],
             "H": self.dimensions[1],
-            "LensName": self.lens_name,
-            "ExposureTime": self.exposure_time
+            "LensName": self.lens_name
+           # "ExposureTime": self.exposure_time
         }
 
 
