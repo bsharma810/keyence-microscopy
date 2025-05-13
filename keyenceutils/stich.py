@@ -89,7 +89,10 @@ class ImageMetadata:
             raise ValueError(f"File: {self.__xml_file} | Attributes not found")
        
         # Extract X and Y coordinates
-        self.image_positions = (int(region.find('X').text), int(region.find('Y').text))
+        try:
+            self.image_positions = (int(region.find('X').text), int(region.find('Y').text))
+        except Exception as e:
+            print(f"Error extracting image positions: {e}")
 
         # Extract width and height from the SavingImageSize section
         self.dimensions = ( int(tree.find('.//SavingImageSize/Width').text),
@@ -178,7 +181,7 @@ class StichedImage:
             {re.search(r'CH\d+', f).group() for f in all_tif_files if re.search(r'CH\d+', f)}
         )
         # check for Z stack images
-        zstack_mode = sorted(re.search(r'_Z\d+_', f) for f in all_tif_files)       
+        zstack_mode = any(re.search(r'_Z\d+_', f) for f in all_tif_files)       
         meta_info = []
         z_max = 0
        
@@ -194,7 +197,7 @@ class StichedImage:
             d["CH_idx"] = c_idx
             d["CH"] = channel
             d["fname"] = tif_files
-            meta_info.append(d)
+           # meta_info.append(d)
 
             if zstack_mode:
                 d["Z"] = d["fname"].apply(lambda x: int(re.search(r'_Z(\d+)_', x).group(1)) 
@@ -229,16 +232,19 @@ class StichedImage:
             # Open the image and handle different modes
             img = tiff.imread(os.path.join(folder_path, row["fname"]))
            
-            if img.dtype == np.uint16:               
-                canvas_array[
+            if img.dtype == np.uint16:  
+                pass
+            elif img.dtype == np.uint8:
+                pass
+            else:  
+                raise ValueError(f"Unsupported image type: {img.dtype}")           
+            canvas_array[
                     row["CH_idx"],
                     row["Z"],
                     row["Y_relative"]: row["Y_relative"] + row["H"],
                     row["X_relative"]: row["X_relative"] + row["W"],
                 ] = np.flipud(np.fliplr(img))
-            else:
-                raise ValueError("WARNING: not 16 bit image")
-
+         
         self.__canvas_array = canvas_array
         self.__meta_info = meta_info
 
